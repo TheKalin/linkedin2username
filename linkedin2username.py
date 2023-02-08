@@ -18,6 +18,7 @@ import json
 import urllib.parse
 import requests
 import urllib3
+from unidecode import unidecode
 
 BANNER = r"""
 
@@ -78,14 +79,8 @@ class NameMutator():
 
         # Use case for tool is mostly standard English, try to standardize common non-English
         # characters.
-        name = re.sub("[àáâãäå]", 'a', name)
-        name = re.sub("[èéêë]", 'e', name)
-        name = re.sub("[ìíîï]", 'i', name)
-        name = re.sub("[òóôõö]", 'o', name)
-        name = re.sub("[ùúûü]", 'u', name)
-        name = re.sub("[ýÿ]", 'y', name)
-        name = re.sub("[ß]", 'ss', name)
-        name = re.sub("[ñ]", 'n', name)
+        # https://stackoverflow.com/questions/517923/what-is-the-best-way-to-remove-accents-normalize-in-a-python-unicode-string
+        name = unidecode(name)
 
         # Get rid of all things in parenthesis. Lots of people put various credentials, etc
         name = re.sub(r'\([^()]*\)', '', name)
@@ -530,7 +525,12 @@ def find_employees(result):
     Retuns a list of dictionary items, or False if none found.
     """
     found_employees = []
-    result_json = json.loads(result)
+    #print(result)
+    try:
+        result_json = json.loads(result)
+    except Exception as e:
+        print("Exception  {0} \n with result {1}".format(e,result))
+        result_json = []
 
     # When you get to the last page of results, the next page will have an empty
     # "elements" list.
